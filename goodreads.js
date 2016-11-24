@@ -73,19 +73,29 @@ goodReads.ask = function() {
 	    //remove similar_books from further processing (not to read their covers, ratings etc.)
 	    var similarBooks = response.getElementsByTagName('similar_books');
 	    for (var j=0; j<similarBooks.length; j++) { similarBooks[j].parentNode.removeChild(similarBooks[j]);}
-	    if ( response.getElementsByTagName('image_url').length>0 ) {  goodReads.cover.push( getTextNode(response.getElementsByTagName('image_url')[0]) ); }
-	    if ( response.getElementsByTagName('description').length>0 ) { goodReads.description.push( getNodeCdata(response.getElementsByTagName('description')[0]) ); }
-	    if ( response.getElementsByTagName('average_rating').length>0 ) {
-	       var ratingTmp=Number(getTextNode(response.getElementsByTagName('average_rating')[0]));
-	       if ( !goodReads.rating ) { 
-			goodReads.rating=ratingTmp; 
-			goodReads.noOfRatings=1;}
-	       else { 
-		     goodReads.rating = ( goodReads.rating * goodReads.noOfRatings + ratingTmp ) / ( goodReads.noOfRatings+1);
-		     goodReads.noOfRatings++; }
-	       }
-	    if ( response.getElementsByTagName('url').length>0 && !goodReads.backLink ) { goodReads.backLink = getNodeCdata(response.getElementsByTagName('url')[0]); }
-	    if ( response.getElementsByTagName('reviews_widget').length>0  ) { goodReads.reviews.push(  getNodeCdata( response.getElementsByTagName('reviews_widget')[0]) ); }
+//RC1 - response can include xml elements (lenth is gt 0), but these el. are empty. They have been removed from processing. 20161124
+		            if ( response.getElementsByTagName('image_url').length>0 ) {
+               if (  getTextNode(response.getElementsByTagName('image_url')[0]) != '') {
+                  goodReads.cover.push( getTextNode(response.getElementsByTagName('image_url')[0]) ); } }
+            if ( response.getElementsByTagName('description').length>0 ) {
+               if (  getNodeCdata(response.getElementsByTagName('description')[0]) != '') {
+                  goodReads.description.push( getNodeCdata(response.getElementsByTagName('description')[0]) ); } }
+            if ( response.getElementsByTagName('average_rating').length>0 ) {
+               var ratingTmp=Number(getTextNode(response.getElementsByTagName('average_rating')[0]));
+               if ( !goodReads.rating ) {
+                        goodReads.rating=ratingTmp;
+                        goodReads.noOfRatings=1;}
+               else {
+                     goodReads.rating = ( goodReads.rating * goodReads.noOfRatings + ratingTmp ) / ( goodReads.noOfRatings+1);
+                     goodReads.noOfRatings++; }
+               }
+            if ( response.getElementsByTagName('url').length>0 && !goodReads.backLink ) {
+               if ( getNodeCdata(response.getElementsByTagName('url')[0]) != '' ) {
+                  goodReads.backLink = getNodeCdata(response.getElementsByTagName('url')[0]); } }
+            if ( response.getElementsByTagName('reviews_widget').length>0  ) {
+               if ( getNodeCdata( response.getElementsByTagName('reviews_widget')[0]) != '' ) {
+                  goodReads.reviews.push(  getNodeCdata( response.getElementsByTagName('reviews_widget')[0]) ); } }
+//RC1 end 
 	    //check if all responses have come. If so, show results
 	    if ( goodReads.NoOfRequests == 0 ) { goodReads.show(); }
 	    }
@@ -155,10 +165,12 @@ getNodeCdata = function(node) {
    for (var i=0; i<node.childNodes.length; i++) {
       if ( node.childNodes[i] instanceof CDATASection ) { return node.childNodes[i].nodeValue; }
       }
+   return ''; //RC1
    }
 getTextNode = function(node) {
    for (var i=0; i<node.childNodes.length; i++) {
       if ( node.childNodes[i].nodeType == 3 ) { return node.childNodes[i].nodeValue; }
       }
+   return ''; //RC1
    }
 
